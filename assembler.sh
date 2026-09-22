@@ -49,3 +49,51 @@ data_count="${lines[0]}"
 for ((i = 1; i <= data_count; i++)); do
     write_byte "${lines[i]}"
 done
+
+has_add_or_sub=0
+
+for ((i = data_count + 1; i < ${#lines[@]}; i++)); do
+    line="${lines[i]}"
+
+    [[ -z "${line//[[:space:]]/}" ]] && continue
+
+    IFS=',' read -r operation reg operand <<< "$line"
+
+    operation="${operation//[[:space:]]/}"
+    reg="${reg//[[:space:]]/}"
+    operand="${operand//[[:space:]]/}"
+
+    case "$operation" in
+        LOAD)
+            opcode=4
+            ;;
+        STORE)
+            opcode=8
+            ;;
+        ADD)
+            opcode=12
+            has_add_or_sub=1
+            ;;
+        SUB)
+            opcode=16
+            has_add_or_sub=1
+            ;;
+        QUIT)
+            opcode=32
+            ;;
+        PRINT)
+            opcode=36
+            ;;
+        *)
+            rm -f "$output"
+            echo "usage: unknown instruction $operation"
+            exit 1
+            ;;
+    esac
+
+    first_byte=$((opcode + reg))
+
+    write_byte "$first_byte"
+    write_byte "$operand"
+done
+
