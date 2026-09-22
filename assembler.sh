@@ -27,3 +27,25 @@ if [[ ! -s "$input" ]]; then
     exit 1
 fi
 
+output="${input%.vsc}.bin"
+rm -f "$output"
+
+write_byte(){
+    local value="$1"
+    printf "\\$(printf '%03o' "$value")" >> "$output"
+}
+
+lines=()
+
+while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line//$'\r'/}"
+    lines[${#lines[@]}]="$line"
+done < "$input"
+
+line="${line//$'\r'/}"
+
+data_count="${lines[0]}"
+
+for ((i = 1; i <= data_count; i++)); do
+    write_byte "${lines[i]}"
+done
