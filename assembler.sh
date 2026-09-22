@@ -97,3 +97,14 @@ for ((i = data_count + 1; i < ${#lines[@]}; i++)); do
     write_byte "$operand"
 done
 
+if [[ $has_add_or_sub -eq 1 ]]; then
+    echo "It is an ADD/SUB program"
+else
+    echo "It is a QUIT program"
+fi
+
+echo "The content of the .bin file is"
+
+od -An -v -t x1 "$output" | tr -s ' ' '\n' | sed '/^$/d'
+
+exit 0
